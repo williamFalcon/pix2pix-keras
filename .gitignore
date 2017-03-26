@@ -89,7 +89,8 @@ ENV/
 .ropeproject
 
 # px2px
-progress_imgs/
+*.jpg
+*.h5
 weights/
 
 # intellij
