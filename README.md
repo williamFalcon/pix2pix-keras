@@ -25,4 +25,4 @@ python main.py
 ```    
 
 ### About this implementation  
-A full write-up will be available at my blog soon [https://williamfalcon.com/pix2pix-keras](https://williamfalcon.com/pix2pix-keras)
+A full write-up about this implementation is available at my blog [https://www.williamfalcon.com/deeplearningimplementations/pix2pix-keras](https://williamfalcon.com/pix2pix-keras)

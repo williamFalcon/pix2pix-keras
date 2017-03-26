@@ -2,7 +2,7 @@ import numpy as np
 import os
 
 from keras.optimizers import Adam
-from pix2pix.utils.facades_generator import facades_generator
+from utils.facades_generator import facades_generator
 from networks.generator import UNETGenerator
 from networks.discriminator import PatchGanDiscriminator
 from networks.DCGAN import DCGAN
@@ -32,7 +32,7 @@ output_img_dim = (output_channels, im_width, im_height)
 # We're using PatchGAN setup, so we need the num of non-overlaping patches
 # this is how big we'll make the patches for the discriminator
 # for example. We can break up a 256x256 image in 16 patches of 64x64 each
-sub_patch_dim = (64, 64)
+sub_patch_dim = (256, 256)
 nb_patch_patches, patch_gan_dim = patch_utils.num_patches(output_img_dim=output_img_dim, sub_patch_dim=sub_patch_dim)
 
 
@@ -93,7 +93,7 @@ discriminator_nn.compile(loss='binary_crossentropy', optimizer=opt_discriminator
 
 # ------------------------
 # RUN ACTUAL TRAINING
-batch_size = 5
+batch_size = 1
 data_path = WORKING_DIR + '/data/' + DATASET
 nb_epoch = 100
 n_images_per_epoch = 400
