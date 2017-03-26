@@ -54,3 +54,56 @@ def extract_patches(images, sub_patch_dim):
             image_patches = images[:, :, y: y+patch_height, x: x+patch_width]
             all_patches.append(np.asarray(image_patches, dtype=np.float32))
     return all_patches
+
+def get_disc_batch(X_original_batch, X_decoded_batch, generator_model, batch_counter, patch_dim,
+                   label_smoothing=False, label_flipping=0):
+
+    # Create X_disc: alternatively only generated or real images
+    if batch_counter % 2 == 0:
+        # generate fake image
+
+        # Produce an output
+        X_disc = generator_model.predict(X_decoded_batch)
+
+        # each image will produce a 1x2 vector for the results (aka is fake or not)
+        y_disc = np.zeros((len(X_disc), 2), dtype=np.uint8)
+
+        # sets all first entries to 1. AKA saying these are fake
+        # these are fake iamges
+        y_disc[:, 0] = 1
+
+        if label_flipping > 0:
+            p = np.random.binomial(1, label_flipping)
+            if p > 0:
+                y_disc[:, [0, 1]] = y_disc[:, [1, 0]]
+
+    else:
+        # generate real image
+        X_disc = X_original_batch
+
+        # each image will produce a 1x2 vector for the results (aka is fake or not)
+        y_disc = np.zeros((X_disc.shape[0], 2), dtype=np.uint8)
+        if label_smoothing:
+            y_disc[:, 1] = np.random.uniform(low=0.9, high=1, size=y_disc.shape[0])
+        else:
+            # these are real images
+            y_disc[:, 1] = 1
+
+        if label_flipping > 0:
+            p = np.random.binomial(1, label_flipping)
+            if p > 0:
+                y_disc[:, [0, 1]] = y_disc[:, [1, 0]]
+
+    # Now extract patches form X_disc
+    X_disc = extract_patches(images=X_disc, sub_patch_dim=patch_dim)
+
+    return X_disc, y_disc
+
+
+def gen_batch(X1, X2, batch_size):
+
+    while True:
+        idx = np.random.choice(X1.shape[0], X1.shape[0], replace=False)
+        x1 = X1[idx]
+        x2 = X2[idx]
+        yield x1, x2

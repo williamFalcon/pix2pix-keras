@@ -1,105 +1,19 @@
 import numpy as np
 import os
 
-import keras.backend as K
 from keras.optimizers import Adam
-from keras.layers.convolutional import Convolution2D, UpSampling2D
-from keras.layers.advanced_activations import LeakyReLU
-from keras.layers import Activation, Flatten, Dense, Input, Reshape, Dropout, merge, Lambda
-from keras.layers.normalization import BatchNormalization
-import matplotlib.pyplot as plt
-from keras.models import Model
 from pix2pix.utils.facades_generator import facades_generator
 from networks.generator import UNETGenerator
 from networks.discriminator import PatchGanDiscriminator
 from networks.DCGAN import DCGAN
 from utils import patch_utils
+from utils import logger
 import time
 
 from keras.utils import generic_utils as keras_generic_utils
 
 WORKING_DIR = os.path.dirname(os.path.realpath(__file__))
 DATASET = 'facades_bw'
-
-def inverse_normalization(X):
-    return X * 255.0
-
-def plot_generated_batch(X_full, X_sketch, generator_model, epoch_num, dataset_name, batch_num):
-
-    # Generate images
-    X_gen = generator_model.predict(X_sketch)
-
-    X_sketch = inverse_normalization(X_sketch)
-    X_full = inverse_normalization(X_full)
-    X_gen = inverse_normalization(X_gen)
-
-    # limit to 8 images as output
-    Xs = X_sketch[:8]
-    Xg = X_gen[:8]
-    Xr = X_full[:8]
-
-    # put |decoded, generated, original| images next to each other
-    X = np.concatenate((Xs, Xg, Xr), axis=3)
-
-    # make one giant block of images
-    X = np.concatenate(X, axis=1)
-
-    # save the giant n x 3 images
-    plt.imsave('./pix2pix_out/progress_imgs/{}_epoch_{}_batch_{}.png'.format(dataset_name, epoch_num, batch_num), X[0], cmap='Greys_r')
-
-
-def get_disc_batch(X_original_batch, X_decoded_batch, generator_model, batch_counter, patch_dim,
-                   label_smoothing=False, label_flipping=0):
-
-    # Create X_disc: alternatively only generated or real images
-    if batch_counter % 2 == 0:
-        # generate fake image
-
-        # Produce an output
-        X_disc = generator_model.predict(X_decoded_batch)
-
-        # each image will produce a 1x2 vector for the results (aka is fake or not)
-        y_disc = np.zeros((len(X_disc), 2), dtype=np.uint8)
-
-        # sets all first entries to 1. AKA saying these are fake
-        # these are fake iamges
-        y_disc[:, 0] = 1
-
-        if label_flipping > 0:
-            p = np.random.binomial(1, label_flipping)
-            if p > 0:
-                y_disc[:, [0, 1]] = y_disc[:, [1, 0]]
-
-    else:
-        # generate real image
-        X_disc = X_original_batch
-
-        # each image will produce a 1x2 vector for the results (aka is fake or not)
-        y_disc = np.zeros((X_disc.shape[0], 2), dtype=np.uint8)
-        if label_smoothing:
-            y_disc[:, 1] = np.random.uniform(low=0.9, high=1, size=y_disc.shape[0])
-        else:
-            # these are real images
-            y_disc[:, 1] = 1
-
-        if label_flipping > 0:
-            p = np.random.binomial(1, label_flipping)
-            if p > 0:
-                y_disc[:, [0, 1]] = y_disc[:, [1, 0]]
-
-    # Now extract patches form X_disc
-    X_disc = patch_utils.extract_patches(images=X_disc, sub_patch_dim=patch_dim)
-
-    return X_disc, y_disc
-
-
-def gen_batch(X1, X2, batch_size):
-
-    while True:
-        idx = np.random.choice(X1.shape[0], X1.shape[0], replace=False)
-        x1 = X1[idx]
-        x2 = X2[idx]
-        yield x1, x2
 
 
 def train():
@@ -205,7 +119,7 @@ def train():
             # some images that come out of here are real and some are fake
             # X is image patches for each image in the batch
             # Y is a 1x2 vector for each image. (means fake or not)
-            X_discriminator, y_discriminator = get_disc_batch(X_train_original_imgs,
+            X_discriminator, y_discriminator = patch_utils.get_disc_batch(X_train_original_imgs,
                                                               X_train_decoded_imgs,
                                                               generator_nn,
                                                               batch_counter,
@@ -216,7 +130,7 @@ def train():
             disc_loss = discriminator_nn.train_on_batch(X_discriminator, y_discriminator)
 
             # create a batch to feed the generator
-            X_gen_target, X_gen = next(gen_batch(X_train_original_imgs, X_train_decoded_imgs, batch_size))
+            X_gen_target, X_gen = next(patch_utils.gen_batch(X_train_original_imgs, X_train_decoded_imgs, batch_size))
             y_gen = np.zeros((X_gen.shape[0], 2), dtype=np.uint8)
             y_gen[:, 1] = 1
 
@@ -252,11 +166,11 @@ def train():
             if batch_counter % 2 == 0:
 
                 # print images for training data progress
-                plot_generated_batch(X_train_original_imgs, X_train_decoded_imgs, generator_nn, epoch, 'tng', mini_batch_i)
+                logger.plot_generated_batch(X_train_original_imgs, X_train_decoded_imgs, generator_nn, epoch, 'tng', mini_batch_i)
 
                 # print images for validation data
-                X_full_val_batch, X_sketch_val_batch = next(gen_batch(X_val_original_imgs, X_val_decoded_imgs, batch_size))
-                plot_generated_batch(X_full_val_batch, X_sketch_val_batch, generator_nn, epoch, 'val', mini_batch_i)
+                X_full_val_batch, X_sketch_val_batch = next(patch_utils.gen_batch(X_val_original_imgs, X_val_decoded_imgs, batch_size))
+                logger.plot_generated_batch(X_full_val_batch, X_sketch_val_batch, generator_nn, epoch, 'val', mini_batch_i)
 
         # -----------------------
         # log epoch
