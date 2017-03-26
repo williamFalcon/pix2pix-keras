@@ -54,7 +54,7 @@ def get_disc_batch(X_original_batch, X_decoded_batch, generator_model, batch_cou
         X_disc = generator_model.predict(X_decoded_batch)
 
         # each image will produce a 1x2 vector for the results (aka is fake or not)
-        y_disc = np.zeros((X_disc.shape[0], 2), dtype=np.uint8)
+        y_disc = np.zeros((len(X_disc), 2), dtype=np.uint8)
 
         # sets all first entries to 1. AKA saying these are fake
         # these are fake iamges
