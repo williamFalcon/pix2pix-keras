@@ -89,7 +89,7 @@ ENV/
 .ropeproject
 
 # px2px
-*.jpg
+*.png
 *.h5
 
 # intellij
