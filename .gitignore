@@ -91,7 +91,6 @@ ENV/
 # px2px
 *.jpg
 *.h5
-weights/
 
 # intellij
 .idea
