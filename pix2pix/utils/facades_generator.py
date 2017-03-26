@@ -38,12 +38,11 @@ def facades_generator(data_dir_name, data_type, im_width, batch_size=10):
             width = height = im_width
 
             for batch_num in range(0, num_images, batch_size):
-                i = batch_num #* batch_size
+                i = batch_num
                 i_end = i + batch_size
 
                 # slice the specific batch that we want and output it through the generator
                 x_batch_facades = np.array(facade_images['data'][i: i_end], dtype=np.float32)
-                x_batch_facades = x_batch_facades[i: i_end]
                 x_batch_facades = x_batch_facades.reshape((len(x_batch_facades), 1, width, height))
                 x_batch_facades = normalize(x_batch_facades)
 

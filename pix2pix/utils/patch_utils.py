@@ -36,7 +36,7 @@ def extract_patches(images, sub_patch_dim):
     :param sub_patch_dim: (height, width) ex: (30, 30) Subpatch dimensions
     :return:
     """
-    im_height, im_width = images[0].shape[2:]
+    im_height, im_width = images.shape[2:]
     patch_height, patch_width = sub_patch_dim
 
     # list out all xs  ex: 0, 29, 58, ...
@@ -66,7 +66,7 @@ def get_disc_batch(X_original_batch, X_decoded_batch, generator_model, batch_cou
         X_disc = generator_model.predict(X_decoded_batch)
 
         # each image will produce a 1x2 vector for the results (aka is fake or not)
-        y_disc = np.zeros((len(X_disc), 2), dtype=np.uint8)
+        y_disc = np.zeros((X_disc.shape[0], 2), dtype=np.uint8)
 
         # sets all first entries to 1. AKA saying these are fake
         # these are fake iamges
@@ -103,7 +103,7 @@ def get_disc_batch(X_original_batch, X_decoded_batch, generator_model, batch_cou
 def gen_batch(X1, X2, batch_size):
 
     while True:
-        idx = np.random.choice(X1.shape[0], X1.shape[0], replace=False)
+        idx = np.random.choice(X1.shape[0], batch_size, replace=False)
         x1 = X1[idx]
         x2 = X2[idx]
         yield x1, x2
