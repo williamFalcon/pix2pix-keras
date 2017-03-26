@@ -1,0 +1,12 @@
+cycler==0.10.0
+h5py==2.6.0
+Keras==1.2.2
+matplotlib==2.0.0
+numpy==1.12.0
+pyparsing==2.1.10
+python-dateutil==2.6.0
+pytz==2016.10
+PyYAML==3.12
+scipy==0.18.1
+six==1.10.0
+Theano==0.8.2
