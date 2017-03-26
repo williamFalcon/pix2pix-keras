@@ -36,7 +36,7 @@ def extract_patches(images, sub_patch_dim):
     :param sub_patch_dim: (height, width) ex: (30, 30) Subpatch dimensions
     :return:
     """
-    im_height, im_width = images.shape[2:]
+    im_height, im_width = images[0].shape[2:]
     patch_height, patch_width = sub_patch_dim
 
     # list out all xs  ex: 0, 29, 58, ...
