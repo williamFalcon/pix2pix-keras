@@ -53,8 +53,7 @@ generator_nn.summary()
 # it's fancier than the standard gan but produces sharper results
 # ----------------------
 discriminator_nn = PatchGanDiscriminator(output_img_dim=output_img_dim,
-                                         patch_dim=patch_gan_dim,
-                                         nb_patches=nb_patch_patches)
+        patch_dim=patch_gan_dim, nb_patches=nb_patch_patches)
 discriminator_nn.summary()
 
 # disable training while we put it through the GAN

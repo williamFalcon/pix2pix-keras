@@ -58,7 +58,7 @@ def PatchGanDiscriminator(output_img_dim, patch_dim, nb_patches):
     for i, filter_size in enumerate(filters_list[1:]):
         name = 'disc_conv_{}'.format(i+2)
 
-        disc_out = Convolution2D(nb_filter=128, nb_row=4, nb_col=4, border_mode='same', subsample=(stride, stride), name=name)(disc_out)
+        disc_out = Convolution2D(nb_filter=filter_size, nb_row=4, nb_col=4, border_mode='same', subsample=(stride, stride), name=name)(disc_out)
         disc_out = BatchNormalization(name=name + '_bn', mode=bn_mode, axis=axis)(disc_out)
         disc_out = LeakyReLU(alpha=0.2)(disc_out)
 
